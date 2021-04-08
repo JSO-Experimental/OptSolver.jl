@@ -1,10 +1,12 @@
-name = "SolverCore"
-uuid = "ff4d7338-4cf1-434d-91df-b86cb86fb843"
-version = "0.1.0"
+name = "OptSolver"
+uuid = "14fd32dd-855e-4bd4-9bcf-9028eba5c4ed"
+version = "0.0.1"
 
 [deps]
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 NLPModels = "a4795742-8479-5a88-8948-cc11e1c8c1a6"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+SolverCore = "ff4d7338-4cf1-434d-91df-b86cb86fb843"
 
 [compat]
 NLPModels = "0.14"

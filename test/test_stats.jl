@@ -1,12 +1,11 @@
-function test_stats()
-  show_statuses()
+@testset "OptOutput" begin
   nlp = ADNLPModel(x->dot(x,x), zeros(2))
-  stats = GenericExecutionStats(
+  stats = OptSolverOutput(
     :first_order,
+    ones(100),
     nlp,
     objective=1.0,
     dual_feas=1e-12,
-    solution=ones(100),
     iter=10,
     solver_specific=Dict(:matvec=>10,
       :dot=>25,
@@ -17,31 +16,15 @@ function test_stats()
     )
   )
 
-  show(stats)
-  print(stats)
-  println(stats)
-  open("teststats.out", "w") do f
-    println(f, stats)
-  end
-
-  println(stats, showvec=(io,x)->print(io,x))
-  open("teststats.out", "a") do f
-    println(f, stats, showvec=(io,x)->print(io,x))
-  end
-
-  line = [:status, :neval_obj, :objective, :iter]
-  for field in line
-    value = statsgetfield(stats, field)
-    println("$field -> $value")
-  end
-  println(statshead(line))
-  println(statsline(stats, line))
+  io = IOBuffer()
+  show(io, stats)
+  @test String(take!(io)) == "Solver output of type OptSolverOutput{Float64}\nStatus: first-order stationary\n"
 
   @testset "Testing inference" begin
     for T in (Float16, Float32, Float64, BigFloat)
       nlp = ADNLPModel(x->dot(x, x), ones(T, 2))
 
-      stats = GenericExecutionStats(:first_order, nlp)
+      stats = OptSolverOutput(:first_order, nlp.meta.x0, nlp)
       @test stats.status == :first_order
       @test typeof(stats.objective) == T
       @test typeof(stats.dual_feas) == T
@@ -49,7 +32,7 @@ function test_stats()
 
       nlp = ADNLPModel(x->dot(x, x), ones(T, 2), x->[sum(x)-1], [0.0], [0.0])
 
-      stats = GenericExecutionStats(:first_order, nlp)
+      stats = OptSolverOutput(:first_order, nlp.meta.x0, nlp)
       @test stats.status == :first_order
       @test typeof(stats.objective) == T
       @test typeof(stats.dual_feas) == T
@@ -58,16 +41,16 @@ function test_stats()
   end
 
   @testset "Test throws" begin
-    @test_throws Exception GenericExecutionStats(:bad, nlp)
-    @test_throws Exception GenericExecutionStats(:unkwown, nlp, bad=true)
+    @test_throws Exception OptSolverOutput(:bad, nlp)
+    @test_throws Exception OptSolverOutput(:unkwown, nlp, bad=true)
   end
 
   @testset "Testing Dummy Solver with multi-precision" begin
     for T in (Float16, Float32, Float64, BigFloat)
       nlp = ADNLPModel(x->dot(x, x), ones(T, 2))
 
-      with_logger(NullLogger()) do
-        stats = dummy_solver(nlp)
+      stats, solver = with_logger(NullLogger()) do
+        DummySolver(nlp)
       end
       @test typeof(stats.objective) == T
       @test typeof(stats.dual_feas) == T
@@ -79,8 +62,8 @@ function test_stats()
 
       nlp = ADNLPModel(x->dot(x, x), ones(T, 2), x->[sum(x)-1], [0.0], [0.0])
 
-      with_logger(NullLogger()) do
-        stats = dummy_solver(nlp)
+      stats, solver = with_logger(NullLogger()) do
+        DummySolver(nlp)
       end
       @test typeof(stats.objective) == T
       @test typeof(stats.dual_feas) == T
@@ -92,5 +75,3 @@ function test_stats()
     end
   end
 end
-
-test_stats()

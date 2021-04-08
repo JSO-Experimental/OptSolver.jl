@@ -1,8 +1,8 @@
 # This package
-using SolverCore
+using OptSolver
 
 # Auxiliary packages
-using ADNLPModels, NLPModels
+using ADNLPModels, NLPModels, SolverCore
 
 # stdlib
 using LinearAlgebra, Logging, Test

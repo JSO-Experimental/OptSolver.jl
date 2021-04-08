@@ -1,4 +1,4 @@
-function test_logging()
+@testset "Logger" begin
   nlps = [ADNLPModel(x -> sum(x.^k), ones(2k), name="Sum of power $k") for k = 2:4]
   push!(nlps, ADNLPModel(x -> dot(x, x), ones(2), x->[sum(x)-1], [0.0], [0.0], name="linquad"))
 
@@ -9,9 +9,8 @@ function test_logging()
 
   with_logger(ConsoleLogger()) do
     @info "Testing dummy solver with logger"
-    dummy_solver(nlps[1], max_eval=20)
+    solver = DummySolver(nlps[1].meta)
+    solve!(solver, nlps[1], max_eval=20)
     reset!.(nlps)
   end
 end
-
-test_logging()
