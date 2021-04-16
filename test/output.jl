@@ -1,26 +1,28 @@
 @testset "OptOutput" begin
-  nlp = ADNLPModel(x -> dot(x, x), zeros(2))
-  output = OptSolverOutput(
-    :first_order,
-    ones(100),
-    nlp,
-    objective = 1.0,
-    dual_feas = 1e-12,
-    iter = 10,
-    solver_specific = Dict(
-      :matvec => 10,
-      :dot => 25,
-      :empty_vec => [],
-      :small_vec => [2.0; 3.0],
-      :axpy => 20,
-      :ray => -1 ./ (1:100),
-    ),
-  )
+  @testset "Show" begin
+    nlp = ADNLPModel(x -> dot(x, x), zeros(2))
+    output = OptSolverOutput(
+      :first_order,
+      ones(100),
+      nlp,
+      objective = 1.0,
+      dual_feas = 1e-12,
+      iter = 10,
+      solver_specific = Dict(
+        :matvec => 10,
+        :dot => 25,
+        :empty_vec => [],
+        :small_vec => [2.0; 3.0],
+        :axpy => 20,
+        :ray => -1 ./ (1:100),
+      ),
+    )
 
-  io = IOBuffer()
-  show(io, output)
-  @test String(take!(io)) ==
-        "Solver output of type OptSolverOutput{Float64, Vector{Float64}}\nStatus: first-order stationary\n"
+    io = IOBuffer()
+    show(io, output)
+    @test String(take!(io)) ==
+          "Solver output of type OptSolverOutput{Float64, Vector{Float64}}\nStatus: first-order stationary\n"
+  end
 
   @testset "Testing inference" begin
     for T in (Float16, Float32, Float64, BigFloat)

@@ -21,10 +21,10 @@ end
 
 function DummySolver(
   meta::AbstractNLPModelMeta;
-  T = eltype(meta.x0),
-  S = typeof(meta.x0),
+  x0::S = meta.x0,
   kwargs...,
-)
+) where {S}
+  T = eltype(x0)
   nvar, ncon = meta.nvar, meta.ncon
   params = parameters(DummySolver{T, S})
   solver = DummySolver{T, S}(
@@ -49,7 +49,7 @@ end
 function SolverCore.solve!(
   solver::DummySolver{T, S},
   nlp::AbstractNLPModel;
-  x::S = nlp.meta.x0,
+  x0::S = nlp.meta.x0,
   atol::Real = sqrt(eps(T)),
   rtol::Real = sqrt(eps(T)),
   max_eval::Int = 1000,
@@ -69,8 +69,7 @@ function SolverCore.solve!(
 
   start_time = time()
   elapsed_time = 0.0
-  solver.workspace.x .= x # Copy values
-  x = solver.workspace.x  # Change reference
+  x = solver.workspace.x .= x0
 
   cx = solver.workspace.cx .= ncon > 0 ? cons(nlp, x) : zeros(T, 0)
   ct = solver.workspace.ct .= zero(T)
