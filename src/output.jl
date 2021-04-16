@@ -1,34 +1,38 @@
 export OptSolverOutput
 
-mutable struct OptSolverOutput{T} <: AbstractSolverOutput{T}
+mutable struct OptSolverOutput{T, S} <: AbstractSolverOutput{T, S}
   status::Symbol
-  solution
+  solution::S
   objective::T # f(x)
   dual_feas::T # ‖∇f(x)‖₂ for unc, ‖P[x - ∇f(x)] - x‖₂ for bnd, etc.
   primal_feas::T # ‖c(x)‖ for equalities
-  multipliers
-  multipliers_L
-  multipliers_U
+  multipliers::S
+  multipliers_L::S
+  multipliers_U::S
   iter::Int
   counters::NLPModels.NLSCounters
   elapsed_time::Float64
   solver_specific::Dict{Symbol, Any}
 end
 
-function OptSolverOutput(
+function OptSolverOutput(status::Symbol, solution::S, nlp::AbstractNLPModel; kwargs...) where {S}
+  OptSolverOutput{eltype(solution)}(status, solution, nlp; kwargs...)
+end
+
+function OptSolverOutput{T}(
   status::Symbol,
-  solution::AbstractArray{T},
+  solution::S,
   nlp::AbstractNLPModel;
   objective::T = T(Inf),
   dual_feas::T = T(Inf),
   primal_feas::T = unconstrained(nlp) || bound_constrained(nlp) ? zero(T) : T(Inf),
-  multipliers::Vector = T[],
-  multipliers_L::Vector = T[],
-  multipliers_U::Vector = T[],
+  multipliers::Vector = S(undef, 0),
+  multipliers_L::Vector = S(undef, 0),
+  multipliers_U::Vector = S(undef, 0),
   iter::Int = -1,
   elapsed_time::Float64 = Inf,
   solver_specific::Dict = Dict{Symbol, Any}(),
-) where {T}
+) where {T, S}
   if !(status in keys(SolverCore.STATUSES))
     @error "status $status is not a valid status. Use one of the following: " join(
       keys(STATUSES),
@@ -46,7 +50,7 @@ function OptSolverOutput(
       setfield!(c, counter, eval(Meta.parse("$counter"))(nlp))
     end
   end
-  return OptSolverOutput{T}(
+  return OptSolverOutput{T, S}(
     status,
     solution,
     objective,

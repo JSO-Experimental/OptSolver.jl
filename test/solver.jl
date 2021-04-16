@@ -1,18 +1,14 @@
 @testset "Solver" begin
-  mutable struct OptNoSolver{T} <: AbstractOptSolver{T} end
-  solver = OptNoSolver{Float64}()
+  mutable struct OptNoSolver{T, S} <: AbstractOptSolver{T, S} end
+  solver = OptNoSolver{Float64, Vector{Float64}}()
 
-  function solve!(::OptNoSolver{T}, nlp::AbstractNLPModel) where {T}
-    return OptSolverOutput(
-      :unknown,
-      zeros(nlp.meta.nvar),
-      nlp
-    )
+  function solve!(::OptNoSolver{T, S}, nlp::AbstractNLPModel) where {T, S}
+    return OptSolverOutput(:unknown, zeros(T, nlp.meta.nvar), nlp)
   end
 
   mutable struct DummyProblem <: AbstractNLPModel
-    meta :: NLPModelMeta
-    counters :: Counters
+    meta::NLPModelMeta
+    counters::Counters
   end
 
   nlp = DummyProblem(NLPModelMeta(3), Counters())

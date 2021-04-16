@@ -20,7 +20,7 @@
   io = IOBuffer()
   show(io, stats)
   @test String(take!(io)) ==
-        "Solver output of type OptSolverOutput{Float64}\nStatus: first-order stationary\n"
+        "Solver output of type OptSolverOutput{Float64, Vector{Float64}}\nStatus: first-order stationary\n"
 
   @testset "Testing inference" begin
     for T in (Float16, Float32, Float64, BigFloat)
@@ -50,9 +50,9 @@
   @testset "Testing Dummy Solver with multi-precision" begin
     for T in (Float16, Float32, Float64, BigFloat)
       nlp = ADNLPModel(x -> dot(x, x), ones(T, 2))
-
-      stats, solver = with_logger(NullLogger()) do
-        DummySolver(nlp)
+      solver = DummySolver(nlp)
+      stats = with_logger(NullLogger()) do
+        solve!(solver, nlp)
       end
       @test typeof(stats.objective) == T
       @test typeof(stats.dual_feas) == T
@@ -64,8 +64,9 @@
 
       nlp = ADNLPModel(x -> dot(x, x), ones(T, 2), x -> [sum(x) - 1], [0.0], [0.0])
 
-      stats, solver = with_logger(NullLogger()) do
-        DummySolver(nlp)
+      solver = DummySolver(nlp)
+      stats = with_logger(NullLogger()) do
+        solve!(solver, nlp)
       end
       @test typeof(stats.objective) == T
       @test typeof(stats.dual_feas) == T

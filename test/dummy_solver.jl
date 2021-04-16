@@ -1,4 +1,4 @@
-mutable struct DummySolver{T} <: AbstractOptSolver{T}
+mutable struct DummySolver{T, S} <: AbstractOptSolver{T, S}
   initialized::Bool
   params::Dict
   workspace
@@ -6,7 +6,7 @@ end
 
 SolverCore.problem_types_handled(::Type{DummySolver}) = [:unc, :bnd, :equ, :bndequ, :ineq, :genopt]
 
-function SolverCore.parameters(::Type{DummySolver{T}}) where {T}
+function SolverCore.parameters(::Type{DummySolver{T, S}}) where {T, S}
   (
     α = (default = T(1e-2), type = :log, min = √√eps(T), max = one(T) / 2),
     β = (default = T(1e-2), type = :log, min = √√eps(T), max = one(T) / 2),
@@ -19,20 +19,25 @@ function SolverCore.are_valid_parameters(::Type{DummySolver}, α, β, δ, reboot
   return α + β ≤ 0.5
 end
 
-function DummySolver(::Type{T}, meta::AbstractNLPModelMeta; kwargs...) where {T}
+function DummySolver(
+  meta::AbstractNLPModelMeta;
+  T = eltype(meta.x0),
+  S = typeof(meta.x0),
+  kwargs...,
+)
   nvar, ncon = meta.nvar, meta.ncon
-  params = parameters(DummySolver{T})
-  solver = DummySolver{T}(
+  params = parameters(DummySolver{T, S})
+  solver = DummySolver{T, S}(
     true,
     Dict(k => v[:default] for (k, v) in pairs(params)),
     ( # workspace
-      x = zeros(T, nvar),
-      xt = zeros(T, nvar),
-      gx = zeros(T, nvar),
-      dual = zeros(T, nvar),
-      y = zeros(T, ncon),
-      cx = zeros(T, ncon),
-      ct = zeros(T, ncon),
+      x = S(undef, nvar),
+      xt = S(undef, nvar),
+      gx = S(undef, nvar),
+      dual = S(undef, nvar),
+      y = S(undef, ncon),
+      cx = S(undef, ncon),
+      ct = S(undef, ncon),
     ),
   )
   for (k, v) in kwargs
@@ -42,15 +47,15 @@ function DummySolver(::Type{T}, meta::AbstractNLPModelMeta; kwargs...) where {T}
 end
 
 function SolverCore.solve!(
-  solver::DummySolver{T},
+  solver::DummySolver{T, S},
   nlp::AbstractNLPModel;
-  x::AbstractVector{T} = T.(nlp.meta.x0),
+  x::S = nlp.meta.x0,
   atol::Real = sqrt(eps(T)),
   rtol::Real = sqrt(eps(T)),
   max_eval::Int = 1000,
   max_time::Float64 = 30.0,
   kwargs...,
-) where {T}
+) where {T, S}
   # Check dim
   solver.initialized || error("Solver not initialized.")
   nvar, ncon = nlp.meta.nvar, nlp.meta.ncon
