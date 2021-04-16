@@ -2,6 +2,19 @@ name = "OptSolver"
 uuid = "14fd32dd-855e-4bd4-9bcf-9028eba5c4ed"
 version = "0.0.1"
 
+[deps]
+NLPModels = "a4795742-8479-5a88-8948-cc11e1c8c1a6"
+SolverCore = "ff4d7338-4cf1-434d-91df-b86cb86fb843"
+
 [compat]
+NLPModels = "0.14"
 julia = "^1.3.0"
 
+[extras]
+ADNLPModels = "54578032-b7ea-4c30-94aa-7cbd1cce6c9a"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["ADNLPModels", "LinearAlgebra", "Logging", "Test"]
