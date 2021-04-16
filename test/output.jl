@@ -1,6 +1,6 @@
 @testset "OptOutput" begin
   nlp = ADNLPModel(x -> dot(x, x), zeros(2))
-  stats = OptSolverOutput(
+  output = OptSolverOutput(
     :first_order,
     ones(100),
     nlp,
@@ -18,7 +18,7 @@
   )
 
   io = IOBuffer()
-  show(io, stats)
+  show(io, output)
   @test String(take!(io)) ==
         "Solver output of type OptSolverOutput{Float64, Vector{Float64}}\nStatus: first-order stationary\n"
 
@@ -26,19 +26,19 @@
     for T in (Float16, Float32, Float64, BigFloat)
       nlp = ADNLPModel(x -> dot(x, x), ones(T, 2))
 
-      stats = OptSolverOutput(:first_order, nlp.meta.x0, nlp)
-      @test stats.status == :first_order
-      @test typeof(stats.objective) == T
-      @test typeof(stats.dual_feas) == T
-      @test typeof(stats.primal_feas) == T
+      output = OptSolverOutput(:first_order, nlp.meta.x0, nlp)
+      @test output.status == :first_order
+      @test typeof(output.objective) == T
+      @test typeof(output.dual_feas) == T
+      @test typeof(output.primal_feas) == T
 
       nlp = ADNLPModel(x -> dot(x, x), ones(T, 2), x -> [sum(x) - 1], [0.0], [0.0])
 
-      stats = OptSolverOutput(:first_order, nlp.meta.x0, nlp)
-      @test stats.status == :first_order
-      @test typeof(stats.objective) == T
-      @test typeof(stats.dual_feas) == T
-      @test typeof(stats.primal_feas) == T
+      output = OptSolverOutput(:first_order, nlp.meta.x0, nlp)
+      @test output.status == :first_order
+      @test typeof(output.objective) == T
+      @test typeof(output.dual_feas) == T
+      @test typeof(output.primal_feas) == T
     end
   end
 
@@ -51,30 +51,30 @@
     for T in (Float16, Float32, Float64, BigFloat)
       nlp = ADNLPModel(x -> dot(x, x), ones(T, 2))
       solver = DummySolver(nlp)
-      stats = with_logger(NullLogger()) do
+      output = with_logger(NullLogger()) do
         solve!(solver, nlp)
       end
-      @test typeof(stats.objective) == T
-      @test typeof(stats.dual_feas) == T
-      @test typeof(stats.primal_feas) == T
-      @test eltype(stats.solution) == T
-      @test eltype(stats.multipliers) == T
-      @test eltype(stats.multipliers_L) == T
-      @test eltype(stats.multipliers_U) == T
+      @test typeof(output.objective) == T
+      @test typeof(output.dual_feas) == T
+      @test typeof(output.primal_feas) == T
+      @test eltype(output.solution) == T
+      @test eltype(output.multipliers) == T
+      @test eltype(output.multipliers_L) == T
+      @test eltype(output.multipliers_U) == T
 
       nlp = ADNLPModel(x -> dot(x, x), ones(T, 2), x -> [sum(x) - 1], [0.0], [0.0])
 
       solver = DummySolver(nlp)
-      stats = with_logger(NullLogger()) do
+      output = with_logger(NullLogger()) do
         solve!(solver, nlp)
       end
-      @test typeof(stats.objective) == T
-      @test typeof(stats.dual_feas) == T
-      @test typeof(stats.primal_feas) == T
-      @test eltype(stats.solution) == T
-      @test eltype(stats.multipliers) == T
-      @test eltype(stats.multipliers_L) == T
-      @test eltype(stats.multipliers_U) == T
+      @test typeof(output.objective) == T
+      @test typeof(output.dual_feas) == T
+      @test typeof(output.primal_feas) == T
+      @test eltype(output.solution) == T
+      @test eltype(output.multipliers) == T
+      @test eltype(output.multipliers_L) == T
+      @test eltype(output.multipliers_U) == T
     end
   end
 end
