@@ -8,10 +8,10 @@ SolverCore.problem_types_handled(::Type{DummySolver}) = [:unc, :bnd, :equ, :bnde
 
 function SolverCore.parameters(::Type{DummySolver{T, S}}) where {T, S}
   (
-    α = (default = T(1e-2), type = :log, min = √√eps(T), max = one(T) / 2),
-    β = (default = T(1e-2), type = :log, min = √√eps(T), max = one(T) / 2),
-    δ = (default = √eps(T), type = :log, min = √eps(T), max = √√√eps(T)),
-    reboot_y = (default = false, type = :bool),
+    α = (default = T(1e-2), type = T, scale = :log, min = √√eps(T), max = one(T) / 2),
+    β = (default = T(1e-2), type = T, scale = :log, min = √√eps(T), max = one(T) / 2),
+    δ = (default = √eps(T), type = T, scale = :log, min = √eps(T), max = √√√eps(T)),
+    reboot_y = (default = false, type = Bool),
   )
 end
 

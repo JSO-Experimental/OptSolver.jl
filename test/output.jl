@@ -54,7 +54,7 @@
       nlp = ADNLPModel(x -> dot(x, x), ones(T, 2))
       solver = DummySolver(nlp)
       output = with_logger(NullLogger()) do
-        solve!(solver, nlp)
+        solve!(solver, nlp, max_eval=5)
       end
       @test typeof(output.objective) == T
       @test typeof(output.dual_feas) == T
@@ -68,7 +68,7 @@
 
       solver = DummySolver(nlp)
       output = with_logger(NullLogger()) do
-        solve!(solver, nlp)
+        solve!(solver, nlp, max_eval=5)
       end
       @test typeof(output.objective) == T
       @test typeof(output.dual_feas) == T

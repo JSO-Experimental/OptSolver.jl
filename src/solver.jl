@@ -1,5 +1,8 @@
 export AbstractOptSolver
 
+# For grid_search_tune
+SolverCore.reset_problem!(nlp::AbstractNLPModel) = reset!(nlp)
+
 """
     AbstractOptSolver{T, S} <: AbstractSolver{T, S}
 
