@@ -1,8 +1,5 @@
 export AbstractOptSolver
 
-# For grid_search_tune
-SolverCore.reset_problem!(nlp::AbstractNLPModel) = reset!(nlp)
-
 """
     AbstractOptSolver{T, S} <: AbstractSolver{T, S}
 
@@ -19,5 +16,16 @@ abstract type AbstractOptSolver{T, S} <: AbstractSolver{T, S} end
 #=
 Expected constructos: Solver(meta)
 =#
-(::Type{S})(nlp::AbstractNLPModel; kwargs...) where {S <: AbstractOptSolver} =
-  S(nlp.meta; kwargs...)
+function (::Type{Solver})(nlp::AbstractNLPModel; kwargs...) where {T, S, Solver <: AbstractOptSolver{T, S}}
+  return Solver(nlp.meta; kwargs...)
+end
+
+function (::Type{Solver})(meta::AbstractNLPModelMeta; x0::S = meta.x0, kwargs...) where {Solver <: AbstractOptSolver, S}
+  T = eltype(x0)
+  return Solver{T, S}(meta; x0 = x0, kwargs...)
+end
+
+function (::Type{Solver})(nlp::AbstractNLPModel; x0::S = nlp.meta.x0, kwargs...) where {Solver <: AbstractOptSolver, S}
+  T = eltype(x0)
+  return Solver{T, S}(nlp.meta; x0 = x0, kwargs...)
+end

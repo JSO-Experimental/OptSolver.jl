@@ -1,5 +1,8 @@
 export OptSolverOutput
 
+SolverCore.solver_output_type(::Type{<: AbstractOptSolver{T, S}}) where {T, S} = OptSolverOutput{T, S}
+SolverCore.solver_output_type(::Type{<: AbstractOptSolver}) = OptSolverOutput{Number, Any}
+
 mutable struct OptSolverOutput{T, S} <: AbstractSolverOutput{T, S}
   status::Symbol
   solution::S

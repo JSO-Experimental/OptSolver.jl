@@ -16,6 +16,10 @@
     @test neval_obj(nlp) == 1
     reset_problem!(nlp)
     @test neval_obj(nlp) == 0
+
+    for T in [Float32, Float64], S in [Vector{T}, Matrix{T}]
+      @test solver_output_type(OptNoSolver{T, S}) == OptSolverOutput{T, S}
+    end
   end
 
   @testset "Multiprecision" begin
